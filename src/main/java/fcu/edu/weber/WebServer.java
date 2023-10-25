@@ -21,15 +21,20 @@ public class WebServer implements Runnable {
         serverSocket = new ServerSocket(portNumber);
         System.out.println("ServerSocket is been build.\n");
 
-        while(true){
-            try {
-                clientSocket = serverSocket.accept();
-                System.out.println("Connect successfully IP : " + clientSocket.getInetAddress() +
-                        " Port Number : " + clientSocket.getPort());
-            } catch (IOException e) {
-                System.out.println("ERROR : " + e);
+        if(!serverSocket.isClosed()){
+            while(true){
+                try {
+                    clientSocket = serverSocket.accept();
+                    System.out.println("Connect successfully IP : " + clientSocket.getInetAddress() +
+                            " Port Number : " + clientSocket.getPort());
+                } catch (IOException e) {
+                    System.out.println("ERROR : " + e);
+                }
             }
+        }else{
+            System.out.println("Server Socket is closed.");
         }
+
    }
 
     public void run() {
