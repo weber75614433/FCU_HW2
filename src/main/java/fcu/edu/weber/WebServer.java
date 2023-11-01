@@ -19,6 +19,7 @@ public class WebServer implements Runnable {
 
    public void createWebServer() throws IOException {
         serverSocket = new ServerSocket(portNumber);
+        System.out.println(serverSocket.getLocalPort());
         System.out.println("ServerSocket is been build.\n");
 
         if(!serverSocket.isClosed()){
@@ -27,8 +28,14 @@ public class WebServer implements Runnable {
                     clientSocket = serverSocket.accept();
                     System.out.println("Connect successfully IP : " + clientSocket.getInetAddress() +
                             " Port Number : " + clientSocket.getPort());
+
+                    httpRequest = new HttpRequest(clientSocket);
+                    Thread thread = new Thread(httpRequest);
+                    thread.start();
                 } catch (IOException e) {
                     System.out.println("ERROR : " + e);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
         }else{
@@ -40,9 +47,7 @@ public class WebServer implements Runnable {
     public void run() {
         try {
             createWebServer();
-            httpRequest = new HttpRequest(clientSocket);
-            Thread thread = new Thread(httpRequest);
-            thread.start();
+
 
         } catch (Exception e) {
             System.out.println("ERROR : " + e);

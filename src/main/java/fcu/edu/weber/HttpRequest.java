@@ -2,11 +2,14 @@ package fcu.edu.weber;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 public class HttpRequest implements Runnable{
     private final String CRLF = "\r\n";
     private Socket socket;
+    private String account = "weber75614433";
+    private String password = "Hd83714433";
 
     public HttpRequest(Socket socket) throws Exception{
         this.socket = socket;
@@ -24,9 +27,44 @@ public class HttpRequest implements Runnable{
         String requestLine = bufferedReader.readLine();
         System.out.println("Request Line : " + requestLine);
 
+        if (requestLine.contains("?")){
+            String[] begin = requestLine.split(" ");
+            System.out.println(Arrays.toString(begin));
+
+            String firstParts = begin[1];
+            String[] queryParts = firstParts.split("\\?");
+
+            String secondPart = queryParts[1];
+            String[] queryParams = secondPart.split("&");
+
+            String getAccount = null;
+            String getPassword = null;
+
+            for(String param : queryParams){
+                if(param.startsWith("username=")){
+                    getAccount = param.substring("username=".length());
+                }else if (param.startsWith("password=")){
+                    getPassword = param.substring("password=".length());
+                }
+            }
+
+            System.out.println(getAccount);
+            System.out.println(getPassword);
+
+            assert getAccount != null;
+            assert getPassword != null;
+            if(getAccount.equals(account) && getPassword.equals(password)){
+                System.out.println("Login Successfully");
+
+                String redirectHeader = "HTTP/1.1 302 Found" + CRLF;
+                redirectHeader += "Location: /pic.html" + CRLF; // 或者是完整的 URL，根据你的需求来决定
+                dataOutputStream.writeBytes(redirectHeader);
+            }
+        }
+
         // Get and display the header lines
         String headerLine = null;
-        while((headerLine = bufferedReader.readLine()).length() != 0){
+        while(!(headerLine = bufferedReader.readLine()).isEmpty()){
             System.out.println("Header Line : " + headerLine);
         }
 
@@ -55,6 +93,7 @@ public class HttpRequest implements Runnable{
         if(fileExists){
             statusLine = "HTTP/1.1 200 OK" +CRLF;
             contentTypeLine = "Content-Type : " + contentType(fileName) + CRLF;
+            System.out.println(contentTypeLine);
         }else{
             statusLine = "HTTP/1.1 404 Not Found" + CRLF;
             contentTypeLine = "Content-Type : text/html" + CRLF;
